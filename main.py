@@ -107,3 +107,21 @@ if training == "y":
     start = mlx.array([encode("Liverpool")])
     out = generate(model, start, max_new_tokens=50)
     print(decode(out[0].tolist()))
+elif training == "n":
+    if not os.path.exists("kickoff.safetensors"):
+        print("No saved model found. Train it first.")
+    else:
+        model.load_weights("kickoff.safetensors")
+        model.eval()
+
+        xb, yb = get_batch("train")
+        print(f"Train Loss = {loss_fn(model, xb, yb).item()}")
+
+        xb, yb = get_batch("val")
+        print(f"Val Loss = {loss_fn(model, xb, yb).item()}")
+
+        start = mlx.array([encode("Liverpool")])
+        out = generate(model, start, max_new_tokens=50)
+        print(decode(out[0].tolist()))
+else:
+    print("Sorry, that is not a valid input.")
