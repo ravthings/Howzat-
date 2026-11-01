@@ -1,4 +1,5 @@
 import mlx.core as mlx
+import mlx.nn as nn
 import wikipediaapi
 import os
 
@@ -60,3 +61,9 @@ class KickOffModel(nn.Module):
     def forward(self, idx):
         logits = self.embedding(idx)
         return logits
+
+model = KickOffModel()
+logits = model(xb)
+
+loss_fn = nn.CrossEntropyLoss()
+optimizer = mlx.optimizers.AdamW(params=model.parameters(), lr=1e-2)
