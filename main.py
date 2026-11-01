@@ -63,7 +63,7 @@ block_size = 64
 vocab_size = len(vocab)
 n_embd = 64
 n_head = 4
-dropout = 0.2
+dropout = 0.3
 
 def get_batch(split):
     d = train_data if split == "train" else val_data
@@ -138,7 +138,7 @@ training = input("Do you want to train the model? y/n ")
 
 if training == "y":
     lr = float(input("What do you want the Learning Rate to be? "))
-    optimizer = optim.AdamW(learning_rate=lr)
+    optimizer = optim.AdamW(learning_rate=lr, weight_decay=0.1)
 
     if os.path.exists("kickoff.safetensors"):
         model.load_weights("kickoff.safetensors")
