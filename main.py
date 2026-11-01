@@ -3,6 +3,7 @@ import mlx.nn as nn
 import mlx.optimizers as optim
 import wikipediaapi
 import os
+import re
 
 if not os.path.exists("football.txt"):
     wiki = wikipediaapi.Wikipedia(
@@ -24,14 +25,17 @@ if not os.path.exists("football.txt"):
 
 with open("football.txt", "r", encoding="utf-8") as F:
     text = F.read()
-words = text.split()
+def tokenize(s):
+    return re.findall(r"\w+|[^\w\s]", s.lower())
+
+words = tokenize(text)
 
 vocab = sorted(set(words))
 stoi = {w: idx for idx, w in enumerate(vocab)}
 itos = {idx: w for w, idx in stoi.items()}
 
 def encode(s):
-    return [stoi[w] for w in s.split()]
+    return [stoi[w] for w in tokenize(s)]
 def decode(ids):
     return " ".join(itos[i] for i in ids)
 
@@ -91,8 +95,9 @@ if training == "y":
         print("No saved model, training from scratch")
 
     loss_and_grad = nn.value_and_grad(model, loss_fn)
-
-    epochs = 1000
+    epochs = input("How many epochs do you want to train for? ")
+    epoche = int(epochs)
+    epochs = epoche
     for epoch in range(epochs):
         xb, yb = get_batch("train")
         loss, grads = loss_and_grad(model, xb, yb)
