@@ -51,3 +51,12 @@ def get_batch(split):
     y = mlx.stack([d[i+1: i+block_size+1]for i in ix])
     return x, y
 xb, yb = get_batch('train')
+
+class KickOffModel(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vocab_size)
+
+    def forward(self, idx):
+        logits = self.embedding(idx)
+        return logits
