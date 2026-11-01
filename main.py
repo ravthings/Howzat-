@@ -43,11 +43,17 @@ def encode(s):
 def decode(ids):
     return " ".join(itos[i] for i in ids)
 
-data = mlx.array(encode(text), dtype=mlx.int64)
+ids = encode(text)
+chunk = 256
+train_ids, val_ids = [], []
+for i in range(0, len(ids), chunk):
+    if (i // chunk) % 10 == 9:
+        val_ids.extend(ids[i : i + chunk])
+    else:
+        train_ids.extend(ids[i : i + chunk])
 
-n = int(0.9 * len(data))
-train_data = data[:n]
-val_data = data[n:]
+train_data = mlx.array(train_ids, dtype=mlx.int64)
+val_data = mlx.array(val_ids, dtype=mlx.int64)
 
 # Hyperparameters
 batch_size = 32
