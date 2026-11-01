@@ -32,3 +32,9 @@ def encode(s):
     return [stoi[w] for w in s.split()]
 def decode(ids):
     return " ".join(itos[i] for i in ids)
+
+data = mlx.array(encode(text), dtype=mlx.int64)
+
+n = int(0.9*len(data))
+train_data = data[:n]
+val_data = data[n:]
