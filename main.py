@@ -49,6 +49,7 @@ val_data = data[n:]
 batch_size = 32
 block_size = 64
 vocab_size = len(vocab)
+n_embd = 64
 
 def get_batch(split):
     d = train_data if split == "train" else val_data
@@ -60,10 +61,12 @@ def get_batch(split):
 class KickOffModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, vocab_size)
+        self.tok_emb = nn.Embedding(vocab_size, n_embd)
+        self.head = nn.Linear(n_embd, vocab_size)
 
     def __call__(self, idx):
-        return self.embedding(idx)
+        x = self.tok_emb(idx)
+        return self.head(x)
 
 model = KickOffModel()
 
