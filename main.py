@@ -38,3 +38,8 @@ data = mlx.array(encode(text), dtype=mlx.int64)
 n = int(0.9*len(data))
 train_data = data[:n]
 val_data = data[n:]
+
+#Hyperparamters
+batch_size = 32
+block_size = 64
+vocab_size = len(vocab)
