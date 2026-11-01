@@ -4,6 +4,7 @@ import mlx.optimizers as optim
 import wikipediaapi
 import os
 import re
+from collections import Counter
 
 if not os.path.exists("football.txt"):
     wiki = wikipediaapi.Wikipedia(
@@ -34,12 +35,13 @@ def tokenize(s):
 
 words = tokenize(text)
 
-vocab = sorted(set(words))
+counts = Counter(words)
+vocab = ["<unk>"] + sorted(w for w, c in counts.items() if c >= 2)
 stoi = {w: idx for idx, w in enumerate(vocab)}
 itos = {idx: w for w, idx in stoi.items()}
 
 def encode(s):
-    return [stoi[w] for w in tokenize(s)]
+    return [stoi.get(w, 0) for w in tokenize(s)]   # unknown words -> 0 (<unk>)
 def decode(ids):
     return " ".join(itos[i] for i in ids)
 
