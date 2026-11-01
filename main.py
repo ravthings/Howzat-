@@ -69,6 +69,24 @@ def get_batch(split):
     y = mlx.stack([d[i + 1 : i + block_size + 1] for i in ix])
     return x, y
 
+class Block(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.ln1 = nn.LayerNorm(n_embd)
+        self.attn = nn.MultiHeadAttention(n_embd, n_head)
+        self.ln2 = nn.LayerNorm(n_embd)
+        self.mlp = nn.Sequential(
+            nn.Linear(n_embd, 4 * n_embd),
+            nn.GELU(),
+            nn.Linear(4 * n_embd, n_embd),
+        )
+
+    def __call__(self, x, mask):
+        h = self.ln1(x)
+        x = x + self.attn(h, h, h, mask=mask)   # gather info from earlier words
+        x = x + self.mlp(self.ln2(x))           # think about it
+        return x
+
 class KickOffModel(nn.Module):
     def __init__(self):
         super().__init__()
