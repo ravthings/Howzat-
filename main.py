@@ -10,7 +10,11 @@ if not os.path.exists("football.txt"):
         user_agent="kickoff-football-bot/1.0 (aaravgarg1011@gmail.com)",
         language="en",
     )
-    clubs = ["FC Barcelona", "Manchester City F.C.", "Liverpool F.C.", "Real Madrid CF"]
+    clubs = [
+    "FC Barcelona", "Manchester City F.C.", "Liverpool F.C.", "Real Madrid CF",
+    "Arsenal F.C.", "Chelsea F.C.", "Manchester United F.C.", "Juventus F.C.",
+    "AC Milan", "Paris Saint-Germain F.C.", "Atlético Madrid", "Tottenham Hotspur F.C.",
+]
     text = ""
 
     for club in clubs:
