@@ -61,6 +61,7 @@ block_size = 64
 vocab_size = len(vocab)
 n_embd = 64
 n_head = 4
+dropout = 0.2
 
 def get_batch(split):
     d = train_data if split == "train" else val_data
@@ -80,11 +81,12 @@ class Block(nn.Module):
             nn.GELU(),
             nn.Linear(4 * n_embd, n_embd),
         )
+        self.drop = nn.Dropout(dropout)                           # NEW
 
     def __call__(self, x, mask):
         h = self.ln1(x)
-        x = x + self.attn(h, h, h, mask=mask)   # gather info from earlier words
-        x = x + self.mlp(self.ln2(x))           # think about it
+        x = x + self.drop(self.attn(h, h, h, mask=mask))          # CHANGED
+        x = x + self.drop(self.mlp(self.ln2(x)))                  # CHANGED
         return x
 
 class HowzatModel(nn.Module):
@@ -95,10 +97,11 @@ class HowzatModel(nn.Module):
         self.block = Block()                      # replaces the bare attention
         self.ln_f = nn.LayerNorm(n_embd)          # final tidy-up
         self.head = nn.Linear(n_embd, vocab_size)
+        self.drop = nn.Dropout(dropout)
 
     def __call__(self, idx):
         B, T = idx.shape
-        x = self.tok_emb(idx) + self.pos_emb(mlx.arange(T))
+        x = self.drop(self.tok_emb(idx) + self.pos_emb(mlx.arange(T)))
         mask = nn.MultiHeadAttention.create_additive_causal_mask(T)
         x = self.block(x, mask)
         return self.head(self.ln_f(x))
@@ -109,6 +112,15 @@ def loss_fn(model, x, y):
     logits = model(x)
     B, T, C = logits.shape
     return nn.losses.cross_entropy(logits.reshape(B * T, C), y.reshape(B * T)).mean()
+
+def estimate_val(n=10):
+    model.eval()
+    total = 0
+    for _ in range(n):
+        vx, vy = get_batch("val")
+        total += loss_fn(model, vx, vy).item()
+    model.train()
+    return total / n
 
 xb, yb = get_batch("train")
 print(loss_fn(model, xb, yb).item())
@@ -136,16 +148,22 @@ if training == "y":
     epochs = input("How many epochs do you want to train for? ")
     epoche = int(epochs)
     epochs = epoche
+    best_val = float("inf")
     for epoch in range(epochs):
         xb, yb = get_batch("train")
+        model.train()
         loss, grads = loss_and_grad(model, xb, yb)
         optimizer.update(model, grads)
         mlx.eval(model.parameters(), optimizer.state)
 
         if epoch % 100 == 0:
-            print(f"Epoch: {epoch}, Loss: {loss.item()}")
+            val_loss = estimate_val()
+            print(f"Epoch: {epoch}, Train: {loss.item():.3f}, Val: {val_loss:.3f}")
+            if val_loss < best_val:
+                best_val = val_loss
+                model.save_weights("kickoff.safetensors")
 
-    model.save_weights("kickoff.safetensors")
+    model.load_weights("kickoff.safetensors")
 
     start = mlx.array([encode("Liverpool")])
     out = generate(model, start, max_new_tokens=50)
