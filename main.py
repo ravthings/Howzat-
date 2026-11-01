@@ -87,22 +87,23 @@ class Block(nn.Module):
         x = x + self.mlp(self.ln2(x))           # think about it
         return x
 
-class KickOffModel(nn.Module):
+class HowzatModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.tok_emb = nn.Embedding(vocab_size, n_embd)
         self.pos_emb = nn.Embedding(block_size, n_embd)
-        self.attn = nn.MultiHeadAttention(n_embd, n_head)   # NEW
+        self.block = Block()                      # replaces the bare attention
+        self.ln_f = nn.LayerNorm(n_embd)          # final tidy-up
         self.head = nn.Linear(n_embd, vocab_size)
 
     def __call__(self, idx):
         B, T = idx.shape
         x = self.tok_emb(idx) + self.pos_emb(mlx.arange(T))
-        mask = nn.MultiHeadAttention.create_additive_causal_mask(T)   # NEW: no peeking ahead
-        x = x + self.attn(x, x, x, mask=mask)                          # NEW: look back
-        return self.head(x)
+        mask = nn.MultiHeadAttention.create_additive_causal_mask(T)
+        x = self.block(x, mask)
+        return self.head(self.ln_f(x))
 
-model = KickOffModel()
+model = HowzatModel()
 
 def loss_fn(model, x, y):
     logits = model(x)
