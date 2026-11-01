@@ -50,6 +50,7 @@ batch_size = 32
 block_size = 64
 vocab_size = len(vocab)
 n_embd = 64
+n_head = 4
 
 def get_batch(split):
     d = train_data if split == "train" else val_data
@@ -62,10 +63,12 @@ class KickOffModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.tok_emb = nn.Embedding(vocab_size, n_embd)
+        self.pos_emb = nn.Embedding(block_size, n_embd)   #one entry per position 0..63
         self.head = nn.Linear(n_embd, vocab_size)
 
     def __call__(self, idx):
-        x = self.tok_emb(idx)
+        B, T = idx.shape
+        x = self.tok_emb(idx) + self.pos_emb(mlx.arange(T))   # meaning + position
         return self.head(x)
 
 model = KickOffModel()
@@ -80,7 +83,7 @@ print(loss_fn(model, xb, yb).item())
 
 def generate(model, idx, max_new_tokens):
     for _ in range(max_new_tokens):
-        logits = model(idx)[:, -1, :]
+        logits = model(idx[:, -block_size:])[:, -1, :]
         next_word = mlx.random.categorical(logits, num_samples=1)
         idx = mlx.concatenate([idx, next_word.astype(idx.dtype)], axis=1)
     return idx
