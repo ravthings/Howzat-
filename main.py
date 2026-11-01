@@ -43,3 +43,11 @@ val_data = data[n:]
 batch_size = 32
 block_size = 64
 vocab_size = len(vocab)
+
+def get_batch(split):
+    d = train_data if split == 'train' else val_data
+    ix = mlx.randint(len(d) - block_size, (batch_size,))
+    x = mlx.stack([d[i: i + block_size]for i in ix])
+    y = mlx.stack([d[i+1: i+block_size+1]for i in ix])
+    return x, y
+xb, yb = get_batch('train')
