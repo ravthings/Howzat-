@@ -1,5 +1,6 @@
 import mlx.core as mlx
 import mlx.nn as nn
+import mlx.optimizers as optim
 import wikipediaapi
 import os
 
@@ -21,7 +22,7 @@ if not os.path.exists("football.txt"):
     with open("football.txt", "w", encoding="utf-8") as f:
         f.write(text)
 
-with open('football.txt', 'r') as F:
+with open("football.txt", "r", encoding="utf-8") as F:
     text = F.read()
 words = text.split()
 
@@ -36,34 +37,73 @@ def decode(ids):
 
 data = mlx.array(encode(text), dtype=mlx.int64)
 
-n = int(0.9*len(data))
+n = int(0.9 * len(data))
 train_data = data[:n]
 val_data = data[n:]
 
-#Hyperparamters
+# Hyperparameters
 batch_size = 32
 block_size = 64
 vocab_size = len(vocab)
 
 def get_batch(split):
-    d = train_data if split == 'train' else val_data
-    ix = mlx.randint(len(d) - block_size, (batch_size,))
-    x = mlx.stack([d[i: i + block_size]for i in ix])
-    y = mlx.stack([d[i+1: i+block_size+1]for i in ix])
+    d = train_data if split == "train" else val_data
+    ix = mlx.random.randint(0, len(d) - block_size, (batch_size,)).tolist()
+    x = mlx.stack([d[i : i + block_size] for i in ix])
+    y = mlx.stack([d[i + 1 : i + block_size + 1] for i in ix])
     return x, y
-xb, yb = get_batch('train')
 
 class KickOffModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=vocab_size)
+        self.embedding = nn.Embedding(vocab_size, vocab_size)
 
-    def forward(self, idx):
-        logits = self.embedding(idx)
-        return logits
+    def __call__(self, idx):
+        return self.embedding(idx)
 
 model = KickOffModel()
-logits = model(xb)
 
-loss_fn = nn.CrossEntropyLoss()
-optimizer = mlx.optimizers.AdamW(params=model.parameters(), lr=1e-2)
+def loss_fn(model, x, y):
+    logits = model(x)
+    B, T, C = logits.shape
+    return nn.losses.cross_entropy(logits.reshape(B * T, C), y.reshape(B * T)).mean()
+
+xb, yb = get_batch("train")
+print(loss_fn(model, xb, yb).item())
+
+def generate(model, idx, max_new_tokens):
+    for _ in range(max_new_tokens):
+        logits = model(idx)[:, -1, :]
+        next_word = mlx.random.categorical(logits, num_samples=1)
+        idx = mlx.concatenate([idx, next_word.astype(idx.dtype)], axis=1)
+    return idx
+
+training = input("Do you want to train the model? y/n ")
+
+if training == "y":
+    lr = float(input("What do you want the Learning Rate to be? "))
+    optimizer = optim.AdamW(learning_rate=lr)
+
+    if os.path.exists("kickoff.safetensors"):
+        model.load_weights("kickoff.safetensors")
+        print("Resuming from saved model")
+    else:
+        print("No saved model, training from scratch")
+
+    loss_and_grad = nn.value_and_grad(model, loss_fn)
+
+    epochs = 1000
+    for epoch in range(epochs):
+        xb, yb = get_batch("train")
+        loss, grads = loss_and_grad(model, xb, yb)
+        optimizer.update(model, grads)
+        mlx.eval(model.parameters(), optimizer.state)
+
+        if epoch % 100 == 0:
+            print(f"Epoch: {epoch}, Loss: {loss.item()}")
+
+    model.save_weights("kickoff.safetensors")
+
+    start = mlx.array([encode("Liverpool")])
+    out = generate(model, start, max_new_tokens=50)
+    print(decode(out[0].tolist()))
