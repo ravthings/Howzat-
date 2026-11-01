@@ -27,3 +27,8 @@ words = text.split()
 vocab = sorted(set(words))
 stoi = {w: idx for idx, w in enumerate(vocab)}
 itos = {idx: w for w, idx in stoi.items()}
+
+def encode(s):
+    return [stoi[w] for w in s.split()]
+def decode(ids):
+    return " ".join(itos[i] for i in ids)
