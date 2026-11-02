@@ -33,6 +33,11 @@ if not os.path.exists("cricket.txt"):
     "2023 Cricket World Cup", "ICC Men's T20 World Cup", "2007 ICC World Twenty20",
     "2021 ICC Men's T20 World Cup", "2022 ICC Men's T20 World Cup",
     "2024 ICC Men's T20 World Cup", "ICC Champions Trophy", "Women's Cricket World Cup",
+    #players
+    "Virat Kohli", "MS Dhoni", "Rohit Sharma", "Jasprit Bumrah", "Steve Smith",
+    "Pat Cummins", "David Warner", "Ben Stokes", "Joe Root", "Kane Williamson",
+    "Babar Azam", "Sachin Tendulkar", "Ricky Ponting", "Shane Warne", "Brian Lara",
+    "Eden Gardens", "Melbourne Cricket Ground", "Lord's", "Wankhede Stadium",
 ]
     text = ""
 
