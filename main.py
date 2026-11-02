@@ -32,20 +32,28 @@ if not os.path.exists("cricket.txt"):
 
 with open("cricket.txt", "r", encoding="utf-8") as F:
     text = F.read()
-def tokenize(s):
-    return re.findall(r"\w+|[^\w\s]", s.lower())
-
-words = tokenize(text)
-
-counts = Counter(words)
-vocab = ["<unk>"] + sorted(w for w, c in counts.items() if c >= 2)
-stoi = {w: idx for idx, w in enumerate(vocab)}
-itos = {idx: w for w, idx in stoi.items()}
+if os.path.exists("tokenizer.json"):
+    tok = Tokenizer.from_file("tokenizer.json")
+else:
+    tok = Tokenizer(models.BPE(unk_token="<unk>"))
+    tok.normalizer = normalizers.Lowercase()
+    tok.pre_tokenizer = pre_tokenizers.ByteLevel(add_prefix_space=False)
+    tok.decoder = decoders.ByteLevel()
+    trainer = trainers.BpeTrainer(
+        vocab_size=2000,
+        special_tokens=["<unk>"],
+        initial_alphabet=pre_tokenizers.ByteLevel.alphabet(),
+    )
+    tok.train_from_iterator([text], trainer)
+    tok.save("tokenizer.json")
 
 def encode(s):
-    return [stoi.get(w, 0) for w in tokenize(s)]   # unknown words -> 0 (<unk>)
+    return tok.encode(s).ids
+
 def decode(ids):
-    return " ".join(itos[i] for i in ids)
+    return tok.decode(ids)
+
+vocab_size = tok.get_vocab_size()
 
 ids = encode(text)
 chunk = 256
@@ -61,11 +69,14 @@ val_data = mlx.array(val_ids, dtype=mlx.int64)
 
 # Hyperparameters
 batch_size = 32
-block_size = 64
-vocab_size = len(vocab)
-n_embd = 64
+block_size = 128
+print("vocab size:", vocab_size)
+print(tok.encode("rajasthan royals qualified").tokens)
+print(decode(encode("Rajasthan Royals qualified, 2025.")))
+n_embd = 128
 n_head = 4
-dropout = 0.3
+n_layer = 2
+dropout = 0.1
 
 def get_batch(split):
     d = train_data if split == "train" else val_data
