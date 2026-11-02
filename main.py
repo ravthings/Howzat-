@@ -6,15 +6,16 @@ import os
 import re
 from collections import Counter
 
-if not os.path.exists("football.txt"):
+if not os.path.exists("cricket.txt"):
     wiki = wikipediaapi.Wikipedia(
         user_agent="kickoff-football-bot/1.0 (aaravgarg1011@gmail.com)",
         language="en",
     )
     clubs = [
-    "FC Barcelona", "Manchester City F.C.", "Liverpool F.C.", "Real Madrid CF",
-    "Arsenal F.C.", "Chelsea F.C.", "Manchester United F.C.", "Juventus F.C.",
-    "AC Milan", "Paris Saint-Germain F.C.", "Atlético Madrid", "Tottenham Hotspur F.C.",
+    "Rajasthan Royals", "Punjab Kings", "Royal Challengers Bengaluru", "Sunrisers Hyderabad",
+    "Mumbai Indians", "Lucknow Super Giants", "Kolkata Knight Riders", "Delhi Capitals",
+    "Chennai Super Kings", "Perth Scorchers", "Sydney Sixers", "Melbourne Stars", "Adelaide Strikers",
+    "Brisbane Heat", "Hobart Hurricanes", "Melbourne Renegades", "Sydney Thunder"
 ]
     text = ""
 
@@ -25,10 +26,10 @@ if not os.path.exists("football.txt"):
             print(f"Got {club}: {len(page.text)} chars")
         else:
             print(f"NOT FOUND: {club}  (check the title)")
-    with open("football.txt", "w", encoding="utf-8") as f:
+    with open("cricket.txt", "w", encoding="utf-8") as f:
         f.write(text)
 
-with open("football.txt", "r", encoding="utf-8") as F:
+with open("cricket.txt", "r", encoding="utf-8") as F:
     text = F.read()
 def tokenize(s):
     return re.findall(r"\w+|[^\w\s]", s.lower())
