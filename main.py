@@ -131,6 +131,7 @@ print(loss_fn(model, xb, yb).item())
 def generate(model, idx, max_new_tokens):
     for _ in range(max_new_tokens):
         logits = model(idx[:, -block_size:])[:, -1, :]
+        logits[:, 0] = -1e9 
         next_word = mlx.random.categorical(logits, num_samples=1)
         idx = mlx.concatenate([idx, next_word.astype(idx.dtype)], axis=1)
     return idx
