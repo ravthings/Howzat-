@@ -13,10 +13,26 @@ if not os.path.exists("cricket.txt"):
         language="en",
     )
     clubs = [
+    # IPL
     "Rajasthan Royals", "Punjab Kings", "Royal Challengers Bengaluru", "Sunrisers Hyderabad",
     "Mumbai Indians", "Lucknow Super Giants", "Kolkata Knight Riders", "Delhi Capitals",
-    "Chennai Super Kings", "Perth Scorchers", "Sydney Sixers", "Melbourne Stars", "Adelaide Strikers",
-    "Brisbane Heat", "Hobart Hurricanes", "Melbourne Renegades", "Sydney Thunder"
+    "Chennai Super Kings", "Gujarat Titans",
+    # Big Bash
+    "Perth Scorchers", "Sydney Sixers", "Melbourne Stars", "Adelaide Strikers",
+    "Brisbane Heat", "Hobart Hurricanes", "Melbourne Renegades", "Sydney Thunder",
+    # National teams
+    "India national cricket team", "Australia national cricket team", "England cricket team",
+    "Pakistan national cricket team", "South Africa national cricket team",
+    "New Zealand national cricket team", "Sri Lanka national cricket team",
+    "West Indies cricket team", "Bangladesh national cricket team",
+    "Afghanistan national cricket team", "Zimbabwe national cricket team", "Ireland cricket team",
+    # Tournaments and World Cups
+    "Indian Premier League", "Big Bash League", "Cricket World Cup",
+    "1983 Cricket World Cup", "2003 Cricket World Cup", "2007 Cricket World Cup",
+    "2011 Cricket World Cup", "2015 Cricket World Cup", "2019 Cricket World Cup",
+    "2023 Cricket World Cup", "ICC Men's T20 World Cup", "2007 ICC World Twenty20",
+    "2021 ICC Men's T20 World Cup", "2022 ICC Men's T20 World Cup",
+    "2024 ICC Men's T20 World Cup", "ICC Champions Trophy", "Women's Cricket World Cup",
 ]
     text = ""
 
@@ -76,7 +92,7 @@ print(decode(encode("Rajasthan Royals qualified, 2025.")))
 n_embd = 128
 n_head = 4
 n_layer = 2
-dropout = 0.1
+dropout = 0.2
 
 def get_batch(split):
     d = train_data if split == "train" else val_data
