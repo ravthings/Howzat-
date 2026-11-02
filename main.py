@@ -5,6 +5,7 @@ import wikipediaapi
 import os
 import re
 from collections import Counter
+from tokenizers import Tokenizer, models, trainers, pre_tokenizers, decoders, normalizers
 
 if not os.path.exists("cricket.txt"):
     wiki = wikipediaapi.Wikipedia(
