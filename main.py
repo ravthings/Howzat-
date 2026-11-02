@@ -84,7 +84,7 @@ train_data = mlx.array(train_ids, dtype=mlx.int64)
 val_data = mlx.array(val_ids, dtype=mlx.int64)
 
 # Hyperparameters
-batch_size = 32
+batch_size = 64
 block_size = 128
 print("vocab size:", vocab_size)
 print(tok.encode("rajasthan royals qualified").tokens)
@@ -92,7 +92,7 @@ print(decode(encode("Rajasthan Royals qualified, 2025.")))
 n_embd = 128
 n_head = 4
 n_layer = 2
-dropout = 0.2
+dropout = 0.3
 
 def get_batch(split):
     d = train_data if split == "train" else val_data
@@ -168,7 +168,7 @@ training = input("Do you want to train the model? y/n ")
 
 if training == "y":
     lr = float(input("What do you want the Learning Rate to be? "))
-    optimizer = optim.AdamW(learning_rate=lr, weight_decay=0.1)
+    optimizer = optim.AdamW(learning_rate=lr, weight_decay=0.05)
 
     if os.path.exists("cricket.safetensors"):
         model.load_weights("cricket.safetensors")
