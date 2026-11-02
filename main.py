@@ -141,8 +141,8 @@ if training == "y":
     lr = float(input("What do you want the Learning Rate to be? "))
     optimizer = optim.AdamW(learning_rate=lr, weight_decay=0.1)
 
-    if os.path.exists("kickoff.safetensors"):
-        model.load_weights("kickoff.safetensors")
+    if os.path.exists("cricket.safetensors"):
+        model.load_weights("cricket.safetensors")
         print("Resuming from saved model")
     else:
         print("No saved model, training from scratch")
@@ -164,18 +164,18 @@ if training == "y":
             print(f"Epoch: {epoch}, Train: {loss.item():.3f}, Val: {val_loss:.3f}")
             if val_loss < best_val:
                 best_val = val_loss
-                model.save_weights("kickoff.safetensors")
+                model.save_weights("cricket.safetensors")
 
-    model.load_weights("kickoff.safetensors")
+    model.load_weights("cricket.safetensors")
 
-    start = mlx.array([encode("Liverpool")])
+    start = mlx.array([encode("Rajasthan Royals")])
     out = generate(model, start, max_new_tokens=50)
     print(decode(out[0].tolist()))
 elif training == "n":
-    if not os.path.exists("kickoff.safetensors"):
+    if not os.path.exists("cricket.safetensors"):
         print("No saved model found. Train it first.")
     else:
-        model.load_weights("kickoff.safetensors")
+        model.load_weights("cricket.safetensors")
         model.eval()
 
         xb, yb = get_batch("train")
@@ -184,7 +184,7 @@ elif training == "n":
         xb, yb = get_batch("val")
         print(f"Val Loss = {loss_fn(model, xb, yb).item()}")
 
-        start = mlx.array([encode("Liverpool")])
+        start = mlx.array([encode("Rajasthan Royals")])
         out = generate(model, start, max_new_tokens=50)
         print(decode(out[0].tolist()))
 else:
